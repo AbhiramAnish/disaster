@@ -13,6 +13,7 @@ const defaultCenter = {
 
 const LocationScreen = () => {
   const [location, setLocation] = useState(defaultCenter);
+  const [loc, setLoc] = useState(true);
 
   // Load the Google Maps script
   const { isLoaded, loadError } = useLoadScript({
@@ -21,6 +22,7 @@ const LocationScreen = () => {
 
   // Get the user's current location
   const getCurrentLocation = () => {
+    setLoc(false); // Turn off "turn on location" state
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -47,9 +49,12 @@ const LocationScreen = () => {
   if (!isLoaded) return <div>Loading Maps...</div>;
 
   return (
-    <GoogleMap mapContainerStyle={mapContainerStyle} zoom={15} center={location}>
-      <Marker position={location} />
-    </GoogleMap>
+    <>
+      {loc && alert("Turn on location services to view the map")}
+      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={15} center={location}>
+        <Marker position={location} />
+      </GoogleMap>
+    </>
   );
 };
 
