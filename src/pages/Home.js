@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import "./Home.css"
-import Maps from '../Constants/Maps'
 import axios from 'axios'
+import LocationScreen from '../Constants/Maps';
+
 
 function Home() {
 
@@ -13,7 +14,7 @@ function Home() {
   },[loc])
   return (
     <div className='Container'>
-        <Maps/>
+        <LocationScreen/>
     </div>
   )
 }
