@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { GoogleMap, Marker, DirectionsRenderer } from "@react-google-maps/api";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 
 const mapContainerStyle = {
   width: "100%",
@@ -7,41 +7,26 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 37.78825, // Default position (change as needed)
-  lng: -122.4324,
+  lat: 37.78825, // Default latitude
+  lng: -122.4324, // Default longitude
 };
-
-const EscapeLocation = {
-  lat: 11.2588,  // Kozhikode Latitude
-  lng: 75.7804,  // Kozhikode Longitude
-};
-
 
 const LocationScreen = () => {
-  const [userLocation, setUserLocation] = useState(defaultCenter);
-  const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [isGomapsLoaded, setIsGomapsLoaded] = useState(false);
+  const [location, setLocation] = useState(defaultCenter);
+  const [loc, setLoc] = useState(true);
 
-  // Replace with your Gomaps.pro API key
-  const gomapsApiKey = "AlzaSyvZ7-oa0O3xC9sxU-GIxOB_0LeSq6wY9gN"; // Your actual Gomaps.pro API key
-  const directionsUrl = `https://maps.gomaps.pro/maps/api/directions/json?origin=${userLocation.lat},${userLocation.lng}&destination=${EscapeLocation.lat},${EscapeLocation.lng}&key=${gomapsApiKey}`;
+  // Load the Google Maps script
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyD23_rSb_haPqZpSW5fxUB1ygk8qm9yrjo", // Replace with your API key
+  });
 
-  const loadGomapsScript = () => {
-    const script = document.createElement("script");
-    script.src = "https://maps.gomaps.pro/maps/api/js?v=3.exp&libraries=places&key=" + gomapsApiKey;
-    script.onload = () => setIsGomapsLoaded(true);
-    document.body.appendChild(script);
-  };
-
-  useEffect(() => {
-    loadGomapsScript();
-  }, []);
-
+  // Get the user's current location
   const getCurrentLocation = () => {
+    setLoc(false); // Turn off "turn on location" state
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          setLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
@@ -56,41 +41,20 @@ const LocationScreen = () => {
     }
   };
 
-  const fetchDirections = async () => {
-    try {
-      const response = await fetch(directionsUrl);
-      const data = await response.json();
-
-      if (data.routes && data.routes[0]) {
-        setDirectionsResponse(data.routes[0]);
-      } else {
-        console.error("No route found!");
-      }
-    } catch (error) {
-      console.error("Error fetching directions:", error);
-    }
-  };
-
   useEffect(() => {
     getCurrentLocation();
   }, []);
 
-  useEffect(() => {
-    if (userLocation.lat !== defaultCenter.lat && userLocation.lng !== defaultCenter.lng) {
-      fetchDirections();
-    }
-  }, [userLocation]);
-
-  if (!isGomapsLoaded) return <div>Loading Maps...</div>;
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading Maps...</div>;
 
   return (
-    <div style={mapContainerStyle}>
-      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={10} center={userLocation}>
-        {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
-        <Marker position={userLocation} />
-        <Marker position={EscapeLocation} />
+    <>
+      {loc && alert("Turn on location services to view the map")}
+      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={15} center={location}>
+        <Marker position={location} />
       </GoogleMap>
-    </div>
+    </>
   );
 };
 

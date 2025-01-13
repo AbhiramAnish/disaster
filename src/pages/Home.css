@@ -1,11 +1,8 @@
-.Container {
-    height: 55%;
+
+
+.Container{
     width: 100%;
-    padding: 31px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    padding-right: 90px;
-    padding-left: 90px;
-  }
-  
+    height: 100vh;
+}
+
 
