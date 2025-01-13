@@ -1,5 +1,5 @@
 {
-  "homepage" : "https://AbhiramAnish.github.io/disaster",
+  "homepage": "https://AbhiramAnish.github.io/disaster",
   "name": "canteen",
   "version": "0.1.0",
   "private": true,
@@ -12,14 +12,15 @@
     "firebase": "^10.12.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.4.0",
     "react-scripts": "5.0.1",
     "styled-components": "^6.1.11",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
-    "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -43,6 +44,7 @@
     ]
   },
   "devDependencies": {
+    "@types/google.maps": "^3.58.1",
     "gh-pages": "^6.2.0",
     "react-router-dom": "^6.24.0"
   }

@@ -7,28 +7,28 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 37.78825, // Default position (change as needed)
+  lat: 37.78825, // Default position
   lng: -122.4324,
 };
 
 const EscapeLocation = {
-  lat: 11.2588,  // Kozhikode Latitude
-  lng: 75.7804,  // Kozhikode Longitude
+  lat: 11.2588, // Kozhikode Latitude
+  lng: 75.7804, // Kozhikode Longitude
 };
-
 
 const LocationScreen = () => {
   const [userLocation, setUserLocation] = useState(defaultCenter);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [isGomapsLoaded, setIsGomapsLoaded] = useState(false);
 
-  // Replace with your Gomaps.pro API key
-  const gomapsApiKey = "AlzaSyvZ7-oa0O3xC9sxU-GIxOB_0LeSq6wY9gN"; // Your actual Gomaps.pro API key
+  // GoMaps API Key directly embedded
+  const gomapsApiKey = "AlzaSyvZ7-oa0O3xC9sxU-GIxOB_0LeSq6wY9gN"; // Replace with your actual GoMaps API key
+
   const directionsUrl = `https://maps.gomaps.pro/maps/api/directions/json?origin=${userLocation.lat},${userLocation.lng}&destination=${EscapeLocation.lat},${EscapeLocation.lng}&key=${gomapsApiKey}`;
 
   const loadGomapsScript = () => {
     const script = document.createElement("script");
-    script.src = "https://maps.gomaps.pro/maps/api/js?v=3.exp&libraries=places&key=" + gomapsApiKey;
+    script.src = `https://maps.gomaps.pro/maps/api/js?v=3.exp&libraries=places&key=${gomapsApiKey}`;
     script.onload = () => setIsGomapsLoaded(true);
     document.body.appendChild(script);
   };
@@ -81,6 +81,11 @@ const LocationScreen = () => {
     }
   }, [userLocation]);
 
+  const handleEscapeMarkerClick = () => {
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${EscapeLocation.lat},${EscapeLocation.lng}&travelmode=driving`;
+    window.open(googleMapsUrl, "_blank");
+  };
+
   if (!isGomapsLoaded) return <div>Loading Maps...</div>;
 
   return (
@@ -88,7 +93,7 @@ const LocationScreen = () => {
       <GoogleMap mapContainerStyle={mapContainerStyle} zoom={10} center={userLocation}>
         {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
         <Marker position={userLocation} />
-        <Marker position={EscapeLocation} />
+        <Marker position={EscapeLocation} onClick={handleEscapeMarkerClick} />
       </GoogleMap>
     </div>
   );
