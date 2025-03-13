@@ -22,6 +22,7 @@ function Home() {
         );
 
         const weather = response.data.data.values; // Extract weather data
+        console.log(weather);
         setWeatherData(weather);
 
         // Send weather data to Flask ML model
@@ -62,7 +63,16 @@ function Home() {
           <p><strong>Temperature:</strong> {weatherData.temperature}°C</p>
           <p><strong>Humidity:</strong> {weatherData.humidity}%</p>
           <p><strong>Wind Speed:</strong> {weatherData.windSpeed} km/h</p>
-          <h2>Prediction: {prediction || "Loading..."}</h2>
+          <h2>
+            Current Situation:{" "}
+            {prediction === "1" ? (
+              <span style={{ color: "red", fontWeight: "bold" }}>DANGER</span>
+            ) : prediction === "0" ? (
+              <span style={{ color: "green", fontWeight: "bold" }}>SAFE</span>
+            ) : (
+              "Loading..."
+            )}
+          </h2>
         </div>
       ) : (
         <p>Loading weather data...</p>
