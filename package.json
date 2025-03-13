@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@types/google.maps": "^3.58.1",
-    "gh-pages": "^6.2.0",
+    "gh-pages": "^6.3.0",
     "react-router-dom": "^6.24.0"
   }
 }
