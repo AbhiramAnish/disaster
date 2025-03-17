@@ -2,76 +2,50 @@ import React, { useEffect, useState } from "react";
 import "./Home.css";
 import axios from "axios";
 import LocationScreen from "../Constants/Maps";
-import twilio from "twilio"; // Import Twilio
 
 function Home() {
   const [weatherData, setWeatherData] = useState(null);
   const [prediction, setPrediction] = useState("");
   const [error, setError] = useState(null);
+  const [location, setLocation] = useState({ lat: 11.8745, lng: 75.3704 }); // Default to Kannur
 
-  // Twilio Credentials
-  const accountSid = "AC93ad21169738fa74300621392c97a4ab";
-  const authToken = "84c50fc79532115c93cef6982c96bad3";
-  const client = twilio(accountSid, authToken);
-  const numbers = ["+918547751321", "+919746458177"];
+  useEffect(() => {
+    fetchWeather(location);
+  }, [location]); // 🔥 Fetch weather whenever location updates
 
-  // Function to Send SMS Alert
-  const sendAlertSMS = async () => {
+  const fetchWeather = async (loc) => {
     try {
-      console.log("Sending SMS alerts...");
+      const response = await axios.get(
+        "https://api.tomorrow.io/v4/weather/realtime",
+        {
+          params: {
+            location: `${loc.lat},${loc.lng}`, 
+            apikey: "FvWrmQZWwEmpgFCd2BMyJVthCHMpW8rW", 
+          },
+        }
+      );
 
-      for (const number of numbers) {
-        const message = await client.messages.create({
-          messagingServiceSid: "MG75dfa40854e9bbb803e81503795cb3f6",
-          body: "//website3",
-          to: number,
-        });
+      const weather = response.data.data.values;
+      console.log("Weather Data:", weather);
+      setWeatherData(weather);
 
-        console.log(`Message sent to ${number}: ${message.sid}`);
-      }
+      getPrediction(weather);
     } catch (error) {
-      console.error("Error sending SMS:", error);
+      console.error("Error fetching weather data:", error);
+      setError("Failed to fetch weather data.");
     }
   };
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.tomorrow.io/v4/weather/realtime",
-          {
-            params: {
-              location: "kannur",
-              apikey: "FvWrmQZWwEmpgFCd2BMyJVthCHMpW8rW",
-            },
-          }
-        );
-
-        const weather = response.data.data.values;
-        console.log(weather);
-        setWeatherData(weather);
-        getPrediction(weather);
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-        setError("Failed to fetch weather data.");
-      }
-    };
-
-    fetchWeather();
-  }, []);
-
   const getPrediction = async (weather) => {
     try {
-      const response = await axios.post("https://backend-1k0p.onrender.com/predict", {
-        weather: [weather.temperature, weather.humidity, weather.windSpeed],
-      });
+      const response = await axios.post(
+        "https://backend-1k0p.onrender.com/predict",
+        {
+          weather: [weather.temperature, weather.humidity, weather.windSpeed], // Adjust for your ML model
+        }
+      );
 
       setPrediction(response.data.prediction);
-
-      // If prediction is "1", send SMS alert
-      if (response.data.prediction === "1") {
-        sendAlertSMS();
-      }
     } catch (error) {
       console.error("Error getting prediction:", error);
       setError("Failed to get prediction.");
@@ -104,7 +78,8 @@ function Home() {
         <p>Loading weather data...</p>
       )}
 
-      <LocationScreen />
+      {/* Pass setLocation to update weather when map is clicked */}
+      <LocationScreen setLocation={setLocation} />
     </div>
   );
 }

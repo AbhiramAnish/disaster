@@ -1,43 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { GoogleMap, Marker } from "@react-google-maps/api"; // Removed DirectionsRenderer
+import { GoogleMap, Marker } from "@react-google-maps/api";
 
 const mapContainerStyle = {
   width: "100%",
   height: "100vh",
 };
 
-const defaultCenter = {
-  lat: 37.78825, // Default position
-  lng: -122.4324,
-};
-
-// Array of multiple escape locations with custom icons
-const escapeLocations = [
-  {
-    name: "Kozhikode",
-    lat: 11.2588,
-    lng: 75.7804,
-    icon: "https://maps.google.com/mapfiles/kml/paddle/grn-blank.png",
-  },
-  {
-    name: "Ernakulam",
-    lat: 9.9312,
-    lng: 76.2673,
-    icon: "https://maps.google.com/mapfiles/kml/paddle/grn-blank.png",
-  },
-  {
-    name: "Thrissur",
-    lat: 10.5276,
-    lng: 76.2144,
-    icon: "https://maps.google.com/mapfiles/kml/paddle/grn-blank.png",
-  },
-];
-
-const LocationScreen = () => {
-  const [userLocation, setUserLocation] = useState(defaultCenter);
+const LocationScreen = ({ setLocation, prediction }) => {
+  const [userLocation, setUserLocation] = useState(null);
+  const [markerLocation, setMarkerLocation] = useState(null);
   const [isGomapsLoaded, setIsGomapsLoaded] = useState(false);
+  const [clickState, setClickState] = useState(0); // 0 = First click, 1 = Second click
 
-  const gomapsApiKey = "AlzaSyYffcngulfi5Yup4OnB1fIsI-hT0TzZYrm"; // Replace with your actual GoMaps API key
+  const gomapsApiKey = "AlzaSyYffcngulfi5Yup4OnB1fIsI-hT0TzZYrm";// Replace with actual API key
 
   const loadGomapsScript = () => {
     const script = document.createElement("script");
@@ -48,16 +23,20 @@ const LocationScreen = () => {
 
   useEffect(() => {
     loadGomapsScript();
+    getCurrentLocation();
   }, []);
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const newLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          });
+          };
+          setUserLocation(newLocation);
+          setMarkerLocation(newLocation);
+          setLocation(newLocation);
         },
         (error) => {
           console.error("Error fetching location:", error.message);
@@ -69,34 +48,47 @@ const LocationScreen = () => {
     }
   };
 
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
-
-  const handleEscapeMarkerClick = (lat, lng) => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
-    window.open(googleMapsUrl, "_blank");
+  const handleMapClick = (event) => {
+    const clickedLat = event.latLng.lat();
+    const clickedLng = event.latLng.lng();
+    const newMarkerLocation = { lat: clickedLat, lng: clickedLng };
+  
+    // Move the marker on every click
+    setMarkerLocation(newMarkerLocation);
+    setLocation(newMarkerLocation);
+  
+    if (clickState === 1) {
+      if (prediction === "0" && userLocation) {
+        // Open Google Maps directions
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${clickedLat},${clickedLng}&travelmode=driving`;
+        window.open(mapsUrl, "_blank");
+  
+        // Reset clickState after opening maps
+        setClickState(0);
+      } 
+    } else {
+      // Set clickState to 1 after first click
+      setClickState(1);
+    }
   };
-  console.log("isGomapsLoaded:", isGomapsLoaded);
+  
+  
+
   if (!isGomapsLoaded) return <div>Loading Maps...</div>;
 
   return (
     <div style={mapContainerStyle}>
-      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={10} center={userLocation}>
-        <Marker position={userLocation} label="You" />
-        
-        {escapeLocations.map((location, index) => (
+      <GoogleMap mapContainerStyle={mapContainerStyle} zoom={10} center={userLocation} onClick={handleMapClick}>
+        {userLocation && <Marker position={userLocation} label="You" />}
+        {markerLocation && (
           <Marker
-          key={index}
-          position={{ lat: location.lat, lng: location.lng }}
-          icon={{
-            url: location.icon, // Ensure this is a valid image URL
-            scaledSize: new window.google.maps.Size(30, 30), // Set the size
-          }}
-          title={location.name}
-          onClick={() => handleEscapeMarkerClick(location.lat, location.lng)}
-        />        
-        ))}
+            position={markerLocation}
+            icon={{
+              url: "https://maps.google.com/mapfiles/kml/paddle/grn-blank.png",
+              scaledSize: new window.google.maps.Size(30, 30),
+            }}
+          />
+        )}
       </GoogleMap>
     </div>
   );
