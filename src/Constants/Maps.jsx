@@ -12,7 +12,7 @@ const LocationScreen = ({ setLocation, prediction }) => {
   const [isGomapsLoaded, setIsGomapsLoaded] = useState(false);
   const [clickState, setClickState] = useState(0); // 0 = First click, 1 = Second click
 
-  const gomapsApiKey = "AlzaSyYffcngulfi5Yup4OnB1fIsI-hT0TzZYrm";// Replace with actual API key
+  const gomapsApiKey = "AlzaSyjnj4rZlwIUt6mFkgbIOJ1Jh7TT38lv-SG";// Replace with actual API key
 
   const loadGomapsScript = () => {
     const script = document.createElement("script");
