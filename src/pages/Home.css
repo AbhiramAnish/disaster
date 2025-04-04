@@ -8,4 +8,16 @@
   overflow-y: auto;
 }
 
+.weather-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Adjust space between the two sections */
+}
+
+.weather-section {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 

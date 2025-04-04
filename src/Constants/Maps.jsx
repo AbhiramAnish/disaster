@@ -60,7 +60,7 @@ const LocationScreen = ({ setLocation, prediction }) => {
     if (clickState === 1) {
       if (prediction === "0" && userLocation) {
         // Open Google Maps directions
-        const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${clickedLat},${clickedLng}&travelmode=driving`;
+        const mapsUrl = `https://www.gomaps.pro/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${clickedLat},${clickedLng}&travelmode=driving`;
         window.open(mapsUrl, "_blank");
   
         // Reset clickState after opening maps

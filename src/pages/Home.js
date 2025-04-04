@@ -4,96 +4,97 @@ import axios from "axios";
 import LocationScreen from "../Constants/Maps";
 
 function Home() {
-  const [weatherData, setWeatherData] = useState(null);
-  const [prediction1, setPrediction1] = useState("");
-  const [prediction2, setPrediction2] = useState("");
+  const [currentWeather, setCurrentWeather] = useState(null);
+  const [clickedWeather, setClickedWeather] = useState(null);
+  const [currentPrediction, setCurrentPrediction] = useState({ flood: "", landslide: "" });
+  const [clickedPrediction, setClickedPrediction] = useState({ flood: "", landslide: "" });
   const [error, setError] = useState(null);
-  const [location, setLocation] = useState({ lat: 11.8745, lng: 75.3704 }); // Default: Kannur
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [clickedLocation, setClickedLocation] = useState(null);
 
   useEffect(() => {
-    if (location) fetchWeather(location);
-  }, [location]); // Fetch weather when location updates
+    if (clickedLocation && !currentLocation) {
+      setCurrentLocation(clickedLocation);  // Set current location initially
+    }
+  }, [clickedLocation]);
 
-  const fetchWeather = async (loc) => {
+  useEffect(() => {
+    if (currentLocation) {
+      setClickedLocation(currentLocation);  // Set selected location to the current one at first
+      fetchWeather(currentLocation, setCurrentWeather, setCurrentPrediction);
+      fetchWeather(currentLocation, setClickedWeather, setClickedPrediction); // Fetch for selected location immediately
+    }
+  }, [currentLocation]);
+
+  useEffect(() => {
+    if (clickedLocation) {
+      fetchWeather(clickedLocation, setClickedWeather, setClickedPrediction);
+    }
+  }, [clickedLocation]);
+
+  const fetchWeather = async (location, setWeather, setPrediction) => {
     try {
-      const apiKey = "FvWrmQZWwEmpgFCd2BMyJVthCHMpW8rW"
+      const apiKey = "FvWrmQZWwEmpgFCd2BMyJVthCHMpW8rW";
       if (!apiKey) throw new Error("Weather API key is missing!");
 
       const response = await axios.get("https://api.tomorrow.io/v4/weather/realtime", {
         params: {
-          location: `${loc.lat},${loc.lng}`,
+          location: `${location.lat},${location.lng}`,
           apikey: apiKey,
         },
       });
 
       const weather = response.data.data.values;
-      console.log("Weather Data:", weather);
-      setWeatherData(weather);
-
-      if (weather.temperature && weather.humidity && weather.windSpeed) {
-        getPredictions(weather);
-      } else {
-        setError("Incomplete weather data received.");
-      }
+      setWeather(weather);
+      getPredictions(weather, setPrediction);
     } catch (error) {
       console.error("Error fetching weather:", error);
-      setError(error.response?.data?.message || "Failed to fetch weather data.");
+      setError("Failed to fetch weather data.");
     }
   };
 
-  const getPredictions = async (weather) => {
+  const getPredictions = async (weather, setPrediction) => {
     try {
-      const response = await axios.post("https://backend-1k0p.onrender.com/predict", {
+      const response = await axios.post("https://backend-1k0p.onrender.com", {
         weather: [weather.temperature, weather.humidity, weather.windSpeed],
       });
 
-      setPrediction1(response.data.prediction1);
-      setPrediction2(response.data.prediction2);
+      setPrediction({
+        flood: response.data.prediction1,
+        landslide: response.data.prediction2,
+      });
     } catch (error) {
       console.error("Error getting predictions:", error);
-      setError(error.response?.data?.message || "Failed to get predictions.");
+      setError("Failed to get predictions.");
     }
   };
+
+  const renderWeatherInfo = (weather, prediction, title) => (
+    <div className="weather-section">
+      <h2>{title}</h2>
+      {weather ? (
+        <div>
+          <p><strong>Temperature:</strong> {weather.temperature}°C</p>
+          <p><strong>Humidity:</strong> {weather.humidity}%</p>
+          <p><strong>Wind Speed:</strong> {weather.windSpeed} km/h</p>
+          <h3><strong>FLOOD:</strong> {prediction.flood === "1" ? "DANGER" : "SAFE"}</h3>
+          <h3><strong>LANDSLIDE:</strong> {parseFloat(prediction.landslide) >= 0.9 ? "DANGER" : "SAFE"}</h3>
+        </div>
+      ) : <p>Loading weather data...</p>}
+    </div>
+  );
 
   return (
     <div className="Container">
       <h1>Weather-Based ML Prediction</h1>
-
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {weatherData ? (
-        <div>
-          <p><strong>Temperature:</strong> {weatherData.temperature}°C</p>
-          <p><strong>Humidity:</strong> {weatherData.humidity}%</p>
-          <p><strong>Wind Speed:</strong> {weatherData.windSpeed} km/h</p>
-          
-          <h2>
-            <strong>Model 1 Prediction:</strong>{" "}
-            {prediction1 === "1" ? (
-              <span style={{ color: "red", fontWeight: "bold" }}>DANGER</span>
-            ) : prediction1 === "0" ? (
-              <span style={{ color: "green", fontWeight: "bold" }}>SAFE</span>
-            ) : (
-              "Loading..."
-            )}
-          </h2>
+      <div className="weather-container">
+  {renderWeatherInfo(currentWeather, currentPrediction, "Current Location")}
+  {renderWeatherInfo(clickedWeather, clickedPrediction, "Selected Location")}
+   </div>
 
-          <h2>
-            <strong>Model 2 Prediction:</strong>{" "}
-            {prediction2 >= "0.9" ? (
-              <span style={{ color: "red", fontWeight: "bold" }}>DANGER</span>
-            ) : prediction2 <= "0.9" ? (
-              <span style={{ color: "green", fontWeight: "bold" }}>SAFE</span>
-            ) : (
-              "Loading..."
-            )}
-          </h2>
-        </div>
-      ) : (
-        <p>Loading weather data...</p>
-      )}
-
-      <LocationScreen setLocation={setLocation} />
+      <LocationScreen setLocation={setClickedLocation} />
     </div>
   );
 }
