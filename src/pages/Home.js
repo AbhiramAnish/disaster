@@ -14,7 +14,7 @@ function Home() {
 
   useEffect(() => {
     if (clickedLocation && !currentLocation) {
-      setCurrentLocation(clickedLocation);  // Set current location initially
+      setCurrentLocation(clickedLocation);  
     }
   }, [clickedLocation]);
 
@@ -55,7 +55,7 @@ function Home() {
 
   const getPredictions = async (weather, setPrediction) => {
     try {
-      const response = await axios.post("https://backend-1k0p.onrender.com", {
+      const response = await axios.post("http://localhost:5000/predict", {
         weather: [weather.temperature, weather.humidity, weather.windSpeed],
       });
 
