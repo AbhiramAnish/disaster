@@ -55,7 +55,7 @@ function Home() {
 
   const getPredictions = async (weather, setPrediction) => {
     try {
-      const response = await axios.post("http://localhost:5000/predict", {
+      const response = await axios.post("https://backend-1k0p.onrender.com", {
         weather: [weather.temperature, weather.humidity, weather.windSpeed],
       });
 
