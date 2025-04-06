@@ -103,7 +103,7 @@ function Home() {
       });
     } catch (error) {
       console.error("Error getting predictions or elevation:", error);
-      setError("Failed to get predictions.");
+      setError(" ");
     }
   };
   
